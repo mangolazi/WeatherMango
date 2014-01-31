@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/i8n">
+        <file alias="lang_tr">i8n/lang_tr.qm</file>
+        <file alias="lang_bg">i8n/lang_bg.qm</file>
+        <file alias="lang_de">i8n/lang_de.qm</file>
+        <file alias="lang_en">i8n/lang_en.qm</file>
+        <file alias="lang_es">i8n/lang_es.qm</file>
+        <file alias="lang_fr">i8n/lang_fr.qm</file>
+        <file alias="lang_it">i8n/lang_it.qm</file>
+        <file alias="lang_mk">i8n/lang_mk.qm</file>
+        <file alias="lang_nl">i8n/lang_nl.qm</file>
+        <file alias="lang_ru">i8n/lang_ru.qm</file>
+        <file alias="lang_hu">i8n/lang_hu.qm</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file alias="sunrise">qml/WeatherMango/icons/sunrise.png</file>
+        <file alias="sunset">qml/WeatherMango/icons/sunset.png</file>
+        <file alias="humid">qml/WeatherMango/icons/humid.png</file>
+        <file alias="wind_arrow">qml/WeatherMango/icons/wind_arrow.png</file>
+    </qresource>
+</RCC>
