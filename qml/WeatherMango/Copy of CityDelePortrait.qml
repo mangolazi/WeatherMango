@@ -32,7 +32,7 @@ Rectangle {
         anchors.leftMargin: 5
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
-        text: qsTr("Updated\n") + Commonfx.dateDifference(p_lastupdate, timezone)  + qsTr(" minutes ago") + rootItem.emptyString
+        text: qsTr("Updated ") + Commonfx.dateDifference(p_lastupdate, timezone)  + qsTr(" minutes ago") + rootItem.emptyString
         color: "white"
         wrapMode: Text.WordWrap
         font.pixelSize: 18
@@ -42,15 +42,14 @@ Rectangle {
         asynchronous: true
         anchors.top: cityTxt.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        height: 115
-        width: 115
+        height: 128
+        width: 128
         smooth: true
         source: Commonfx.getIcon(p_icon)
     }
     Text {
         id: weatherTxt
         anchors.verticalCenter: iconImage.verticalCenter
-        anchors.verticalCenterOffset: -5
         anchors.left: iconImage.right
         anchors.leftMargin: 10
         verticalAlignment: Text.AlignVCenter
@@ -73,24 +72,22 @@ Rectangle {
     }
     Text {
         id: sunriseTxt
-        //anchors.verticalCenter: sunriseImage.verticalCenter
-        //anchors.left: sunriseImage.right
-        //anchors.leftMargin: 5
-        anchors.top: sunriseImage.bottom
-        anchors.horizontalCenter: sunriseImage.horizontalCenter
+        anchors.verticalCenter: sunriseImage.verticalCenter
+        anchors.left: sunriseImage.right
+        anchors.leftMargin: 5
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignLeft
         text: Commonfx.getForecasthour(p_sunrise, timezone)
         color: "lightgray"
-        font.pixelSize: 16
+        font.pixelSize: 18
     }
     Image {
         id: sunsetImage
         asynchronous: true
-        //anchors.top: sunriseImage.bottom
-        anchors.top: iconImage.bottom
+        anchors.top: sunriseImage.bottom
+        anchors.topMargin: 5
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.horizontalCenterOffset: -40
+        anchors.horizontalCenterOffset: -120
         height: 30
         width: 30
         smooth: true
@@ -98,22 +95,43 @@ Rectangle {
     }
     Text {
         id: sunsetTxt
-        //anchors.verticalCenter: sunsetImage.verticalCenter
-        //anchors.left: sunsetImage.right
-        //anchors.leftMargin: 5
-        anchors.top: sunsetImage.bottom
-        anchors.horizontalCenter: sunsetImage.horizontalCenter
+        anchors.verticalCenter: sunsetImage.verticalCenter
+        anchors.left: sunsetImage.right
+        anchors.leftMargin: 5
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignLeft
         text: Commonfx.getForecasthour(p_sunset, timezone)
         color: "lightgray"
-        font.pixelSize: 16
+        font.pixelSize: 18
+    }
+    Image {
+        id: winddirectionImage
+        asynchronous: true
+        anchors.top: iconImage.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.horizontalCenterOffset: 40
+        height: 30
+        width: 30
+        smooth: true
+        source: "qrc:/icons/wind_arrow"
+        rotation: Math.round(p_winddirection)
+    }
+    Text {
+        id: windspeedTxt
+        anchors.verticalCenter: winddirectionImage.verticalCenter
+        anchors.left: winddirectionImage.right
+        anchors.leftMargin: 5
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignLeft
+        text: Commonfx.convertWindspeed(p_windspeed)
+        color: "lightgray"
+        font.pixelSize: 18
     }
     Image {
         id: humidityImage
         asynchronous: true
-        //anchors.top: winddirectionImage.bottom
-        anchors.top: iconImage.bottom
+        anchors.top: winddirectionImage.bottom
+        anchors.topMargin: 5
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.horizontalCenterOffset: 40
         height: 30
@@ -123,42 +141,14 @@ Rectangle {
     }
     Text {
         id: humidityTxt
-        //anchors.verticalCenter: humidityImage.verticalCenter
-        //anchors.left: humidityImage.right
-        //anchors.leftMargin: 5
-        anchors.top: humidityImage.bottom
-        anchors.horizontalCenter: humidityImage.horizontalCenter
+        anchors.verticalCenter: humidityImage.verticalCenter
+        anchors.left: humidityImage.right
+        anchors.leftMargin: 5
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignLeft
         text: p_humidity + p_humidityunit
         color: "lightgray"
-        font.pixelSize: 16
-    }
-    Image {
-        id: winddirectionImage
-        asynchronous: true
-        //anchors.top: iconImage.bottom
-        anchors.top: iconImage.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.horizontalCenterOffset: 120
-        height: 30
-        width: 30
-        smooth: true
-        source: "qrc:/icons/wind_arrow"
-        rotation: Math.round(p_winddirection)
-    }
-    Text {
-        id: windspeedTxt
-        //anchors.verticalCenter: winddirectionImage.verticalCenter
-        //anchors.left: winddirectionImage.right
-        //anchors.leftMargin: 5
-        anchors.top: winddirectionImage.bottom
-        anchors.horizontalCenter: winddirectionImage.horizontalCenter
-        verticalAlignment: Text.AlignVCenter
-        horizontalAlignment: Text.AlignLeft
-        text: Commonfx.convertWindspeed(p_windspeed)
-        color: "lightgray"
-        font.pixelSize: 16
+        font.pixelSize: 18
     }
 
 } // end rectangle

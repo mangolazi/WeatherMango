@@ -7,7 +7,7 @@ import "fx.js" as Commonfx
 Component {
   ListItem {
       //property variant myData: model
-      height: 65
+      height: 70
 
       Text {
           id: dateTxt
@@ -23,8 +23,8 @@ Component {
       Image {
           id: iconImage
           asynchronous: true
-          height: 65
-          width: 65
+          height: 70
+          width: 70
           anchors.horizontalCenter: parent.horizontalCenter
           anchors.verticalCenter: parent.verticalCenter
           source: Commonfx.getIcon(model.icon)
@@ -35,7 +35,7 @@ Component {
           anchors.right: mintempTxt.left
           anchors.rightMargin: 20
           width: 40
-          anchors.verticalCenter: iconImage.verticalCenter
+          anchors.verticalCenter: parent.verticalCenter
           verticalAlignment: Text.AlignVCenter
           horizontalAlignment: Text.AlignHCenter
           text: Commonfx.convertTemp(model.maxtemp, Commonfx.currentUnits)
@@ -48,7 +48,7 @@ Component {
           anchors.right: parent.right
           anchors.rightMargin: 5
           width: 40
-          anchors.verticalCenter: iconImage.verticalCenter
+          anchors.verticalCenter: parent.verticalCenter
           verticalAlignment: Text.AlignVCenter
           horizontalAlignment: Text.AlignHCenter
           text: Commonfx.convertTemp(model.mintemp, Commonfx.currentUnits)

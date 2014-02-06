@@ -39,12 +39,12 @@ Page {
         ToolButton {
             id: toolbarbtnBack
             flat: true
-            iconSource: "toolbar-back"
+            iconSource: (flipable.flipped == true) ? "toolbar-back" : "qrc:/icons/close_stop"
             onClicked: (flipable.flipped == true) ? (flipable.flipped = false) : Qt.quit()
             }
 
         ToolButton {
-            id: toolbarbtnGps
+            id: toolbarbtnHome
             flat: true
             iconSource: "toolbar-home"
             property bool longPress : false
@@ -53,6 +53,7 @@ Page {
                 if (longPress == false) {
                     if (homeCity != "") {
                         cityActive = homeCity
+                        favoriteCityIndex = -1
                         loadLocalDB()
                         // set favorite city status from database, if set
                         favoriteCity = modelCity.get(0).favoritecity
@@ -114,9 +115,10 @@ Page {
                  onClicked: pageStack.push(Qt.resolvedUrl("ManageCities.qml"))
              }
              MenuItem {
-                 text: qsTr("Refresh data") + rootItem.emptyString
+                 text: qsTr("Refresh") + rootItem.emptyString
                  onClicked: {
                      if (cityActive != "") {
+                         favoriteCity = modelCity.get(0).favoritecity
                          xmlCity.query = "/current"
                          xmlCity.source = "http://api.openweathermap.org/data/2.5/weather?id=" + cityActive + "&units=metric&lang=en&mode=xml"
                          xmlCity.reload()
@@ -125,13 +127,17 @@ Page {
                  }
              }
              MenuItem {
+                 text: qsTr("View on OpenWeatherMap.org") + rootItem.emptyString
+                 onClicked: Qt.openUrlExternally("http://m.openweathermap.org/city/" + cityActive)
+             }
+             MenuItem {
                  text: qsTr("Settings") + rootItem.emptyString
                  onClicked: pageStack.push(Qt.resolvedUrl("Settings.qml"))
              }
-             MenuItem {
+             /*MenuItem {
                  text: qsTr("About")  + rootItem.emptyString
                  onClicked: pageStack.push(Qt.resolvedUrl("About.qml"))
-             }
+             }*/
          }
      }
 
@@ -305,58 +311,237 @@ Page {
     // ================================================
     // CITY VIEW
     // ================================================
-    // someday do something! like forward/back on favorite cities
-    Loader {
-        id: cityView
+    Flickable {
+        id: cityFlick
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        height: parent.height / 3 + 45
+        height: parent.height / 3 + 20
+        flickableDirection: Flickable.HorizontalFlick
 
-        // properties to map to DB or XML values
-        property string p_city : ""
-        property string p_country : ""
-        property string p_lastupdate : ""
-        property string p_icon : ""
-        property real p_currenttemp : 0
-        property string p_tempunit : ""
-        property string p_sunrise : ""
-        property string p_sunset : ""
-        property real p_winddirection : 0
-        property real p_windspeed : 0
-        property string p_humidity : ""
-        property string p_humidityunit : ""
+        Loader {
+            id: cityView
+            anchors.fill: parent
 
-        states: [
-            State {
-                name: "PORTRAIT";
-                PropertyChanges { target: cityView; height: parent.height / 3 + 45}
-                PropertyChanges { target: cityView; source: "" }
-                PropertyChanges { target: cityView; source: "CityDelePortrait.qml" }
-            },
-            State {
-                name: "LANDSCAPE";
-                PropertyChanges { target: cityView; height: parent.height / 3 + 35}
-                PropertyChanges { target: cityView; source: "" }
-                PropertyChanges { target: cityView; source: "CityDeleLandscape.qml" }
-            },
-            State {
-                name: "E6";
-                PropertyChanges { target: cityView; height: parent.height / 2 - 10 }
-                PropertyChanges { target: cityView; source: "" }
-                PropertyChanges { target: cityView; source: "CityDeleE6.qml" }
+            // properties to map to DB or XML values
+            property string p_city : ""
+            property string p_country : ""
+            property string p_lastupdate : ""
+            property string p_icon : ""
+            property real p_currenttemp : 0
+            property string p_tempunit : ""
+            property string p_sunrise : ""
+            property string p_sunset : ""
+            property real p_winddirection : 0
+            property real p_windspeed : 0
+            property string p_humidity : ""
+            property string p_humidityunit : ""
+        } // end city loader
+
+    states: [
+        State {
+            name: "PORTRAIT";
+            PropertyChanges { target: cityFlick; height: parent.height / 3 + 20}
+            PropertyChanges { target: cityView; source: "" }
+            PropertyChanges { target: cityView; source: "CityDelePortrait.qml" }
+        },
+        State {
+            name: "LANDSCAPE";
+            PropertyChanges { target: cityFlick; height: parent.height / 3 + 35}
+            PropertyChanges { target: cityView; source: "" }
+            PropertyChanges { target: cityView; source: "CityDeleLandscape.qml" }
+        },
+        State {
+            name: "E6";
+            PropertyChanges { target: cityFlick; height: parent.height / 2 - 10 }
+            PropertyChanges { target: cityView; source: "" }
+            PropertyChanges { target: cityView; source: "CityDeleE6.qml" }
+        }
+    ]
+
+    // FLICKABLE FUNCTIONS
+    onFlickStarted: {
+        // Left flick, advance forward through favorite cities list
+        if (horizontalVelocity > 0) {
+            favoriteCityIndex += 1
+            if (favoriteCityIndex < modelSavedCities.count) {
+                // if next city is not home city, load, otherwise skip
+                if (homeCity != modelSavedCities.get(favoriteCityIndex).cityid) {
+                    console.log("Not home city, loading data + " + favoriteCityIndex)
+                    cityActive = modelSavedCities.get(favoriteCityIndex).cityid
+                }
+                else {
+                    favoriteCityIndex += 1
+                    cityActive = modelSavedCities.get(favoriteCityIndex).cityid
+                    console.log("Home city found, skipping to + " + favoriteCityIndex)
+                }
             }
-        ]
+            else { // at end, loop back to home city
+                console.log("End, loop back to start, home")
+                favoriteCityIndex = -1
+                cityActive = homeCity
+            }
+        }
+        // Right flick, reverse through favorite cities list
+        else {            
+            favoriteCityIndex -= 1
+            if (favoriteCityIndex > 0) {
+                if (homeCity != modelSavedCities.get(favoriteCityIndex).cityid) {
+                    console.log("Not home city, loading data - " + favoriteCityIndex)
+                    cityActive = modelSavedCities.get(favoriteCityIndex).cityid
+                }
+                else {
+                    favoriteCityIndex -= 1
+                    cityActive = modelSavedCities.get(favoriteCityIndex).cityid
+                    console.log("Home city found, skipping to - " + favoriteCityIndex)
+                }
+            }
+            else { // at end, loop back to home
+                console.log("End, loop back to start, home")
+                favoriteCityIndex = -1
+                cityActive = homeCity
+            }
+        }
+
+        // load online data if more than an hour has passed since last update
+        loadLocalDB()
+
+        if (Commonfx.getNewUpdate(modelCity.get(0).lastupdate, timezone) == true) {
+            console.log("Supposed to reload data")
+            xmlCity.query = "/current"
+            xmlCity.source = "http://api.openweathermap.org/data/2.5/weather?id=" + cityActive + "&units=metric&lang=en&mode=xml"
+            xmlCity.reload()
+        }
     }
+
+    } // end city flick
 
 
     // ================================================
-    // CITY XML MODEL AND DATABASE MODEL
+    // FLIPABLE FOR DAILY/HOURLY FORECAST VIEWS
     // ================================================
-    ListModel {
-        id: modelCity
-    }
+    Rectangle {
+        anchors.top: cityFlick.bottom
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        gradient: Gradient {
+                GradientStop { position: 0.0; color: "#000000" }
+                GradientStop { position: 1.0; color: "#303030" }
+            }
 
+    Flipable {
+         id: flipable
+         anchors.fill: parent
+         property bool flipped: false
+
+         // ================================================
+         // DAILY FORECAST VIEW
+         // ================================================
+         front:
+             ListView {
+             id: forecastViewDaily
+             anchors.fill: parent
+             clip: true
+             orientation: ListView.Vertical
+             enabled: true
+
+             states: [
+                 State {
+                     name: "PORTRAIT";
+                     PropertyChanges { target: forecastViewDaily; orientation: ListView.Vertical }
+                     PropertyChanges { target: forecastViewDaily; delegate: forecastDelePortrait }
+                 },
+                 State {
+                     name: "LANDSCAPE";
+                     PropertyChanges { target: forecastViewDaily; orientation: ListView.Horizontal }
+                     PropertyChanges { target: forecastViewDaily; delegate: forecastDeleLandscape }
+                 },
+                 State {
+                     name: "E6";
+                     PropertyChanges { target: forecastViewDaily; orientation: ListView.Horizontal }
+                     PropertyChanges { target: forecastViewDaily; delegate: forecastDeleE6 }
+                 }
+             ]
+         }
+
+         // ================================================
+         // HOURLY FORECAST VIEW
+         // ================================================
+         back:
+             ListView {
+             id: forecastViewHourly
+             anchors.fill: parent
+             clip: true
+             orientation: ListView.Vertical
+             enabled: true
+                 /*Loader {
+                     source: getHourlyDele()
+                     function getHourlyDele() {
+                         if (forecastViewHourly.state == "PORTRAIT") return "HourlyDelePortrait.qml"
+                         if (forecastViewHourly.state == "LANDSCAPE") return "HourlyDeleLandscape.qml"
+                         if (forecastViewHourly.state == "E6") return "HourlyDeleE6.qml"
+                     }
+                 }*/
+
+
+             states: [
+                 State {
+                     name: "PORTRAIT";
+                     PropertyChanges { target: forecastViewHourly; orientation: ListView.Vertical }
+                     PropertyChanges { target: forecastViewHourly; delegate: hourlyDelePortrait }
+                 },
+                 State {
+                     name: "LANDSCAPE";
+                     PropertyChanges { target: forecastViewHourly; orientation: ListView.Horizontal }
+                     PropertyChanges { target: forecastViewHourly; delegate: hourlyDeleLandscape }
+                 },
+                 State {
+                     name: "E6";
+                     PropertyChanges { target: forecastViewHourly; orientation: ListView.Horizontal }
+                     PropertyChanges { target: forecastViewHourly; delegate: hourlyDeleE6 }
+                 }
+             ]
+         }
+
+         transform: Rotation {
+             id: rotation
+             origin.x: flipable.width/2
+             origin.y: flipable.height/2
+             axis.x: 1; axis.y: 0; axis.z: 0     // set axis.y to 1 to rotate around y-axis
+             angle: 0    // the default angle
+         }
+
+         states: State {
+             name: "back"
+             PropertyChanges { target: rotation; angle: 180 }
+             when: flipable.flipped
+         }
+
+         transitions: Transition {
+             NumberAnimation { target: rotation; property: "angle"; duration: 300 }
+         }
+     } // end flipable
+
+    } // end rectangle
+
+    // ================================================
+    // MISC FORECAST MODELS FOR DATABASE ACCESS AND DELEGATES
+    // ================================================
+    ListModel { id: modelCity }
+    ListModel { id: modelForecastDaily }
+    ListModel { id: modelForecastHourly }
+
+    ForecastDeleE6 { id: forecastDeleE6 }
+    ForecastDeleLandscape { id: forecastDeleLandscape }
+    ForecastDelePortrait { id: forecastDelePortrait }
+    HourlyDeleE6 { id: hourlyDeleE6 }
+    HourlyDeleLandscape { id: hourlyDeleLandscape }
+    HourlyDelePortrait { id: hourlyDelePortrait }
+
+    // ================================================
+    // CITY XML MODEL
+    // ================================================
     XmlListModel {
         id: xmlCity
         query: "/current"
@@ -494,127 +679,6 @@ Page {
     }
 
     // ================================================
-    // FLIPABLE FOR DAILY/HOURLY FORECAST VIEWS
-    // ================================================
-    Rectangle {
-        anchors.top: cityView.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        gradient: Gradient {
-                GradientStop { position: 0.0; color: "#000000" }
-                GradientStop { position: 1.0; color: "#303030" }
-            }
-
-    Flipable {
-         id: flipable
-         anchors.fill: parent
-         property bool flipped: false
-
-         // ================================================
-         // DAILY FORECAST VIEW
-         // ================================================
-         front:
-             ListView {
-             id: forecastViewDaily
-             anchors.fill: parent
-             clip: true
-             orientation: ListView.Vertical
-             enabled: true
-
-             states: [
-                 State {
-                     name: "PORTRAIT";
-                     PropertyChanges { target: forecastViewDaily; orientation: ListView.Vertical }
-                     PropertyChanges { target: forecastViewDaily; delegate: forecastDelePortrait }
-                 },
-                 State {
-                     name: "LANDSCAPE";
-                     PropertyChanges { target: forecastViewDaily; orientation: ListView.Horizontal }
-                     PropertyChanges { target: forecastViewDaily; delegate: forecastDeleLandscape }
-                 },
-                 State {
-                     name: "E6";
-                     PropertyChanges { target: forecastViewDaily; orientation: ListView.Horizontal }
-                     PropertyChanges { target: forecastViewDaily; delegate: forecastDeleE6 }
-                 }
-             ]
-         }
-
-         // ================================================
-         // HOURLY FORECAST VIEW
-         // ================================================
-         back:
-             ListView {
-             id: forecastViewHourly
-             anchors.fill: parent
-             clip: true
-             orientation: ListView.Vertical
-             enabled: true
-                 /*Loader {
-                     source: getHourlyDele()
-                     function getHourlyDele() {
-                         if (forecastViewHourly.state == "PORTRAIT") return "HourlyDelePortrait.qml"
-                         if (forecastViewHourly.state == "LANDSCAPE") return "HourlyDeleLandscape.qml"
-                         if (forecastViewHourly.state == "E6") return "HourlyDeleE6.qml"
-                     }
-                 }*/
-
-
-             states: [
-                 State {
-                     name: "PORTRAIT";
-                     PropertyChanges { target: forecastViewHourly; orientation: ListView.Vertical }
-                     PropertyChanges { target: forecastViewHourly; delegate: hourlyDelePortrait }
-                 },
-                 State {
-                     name: "LANDSCAPE";
-                     PropertyChanges { target: forecastViewHourly; orientation: ListView.Horizontal }
-                     PropertyChanges { target: forecastViewHourly; delegate: hourlyDeleLandscape }
-                 },
-                 State {
-                     name: "E6";
-                     PropertyChanges { target: forecastViewHourly; orientation: ListView.Horizontal }
-                     PropertyChanges { target: forecastViewHourly; delegate: hourlyDeleE6 }
-                 }
-             ]
-         }
-
-         transform: Rotation {
-             id: rotation
-             origin.x: flipable.width/2
-             origin.y: flipable.height/2
-             axis.x: 1; axis.y: 0; axis.z: 0     // set axis.y to 1 to rotate around y-axis
-             angle: 0    // the default angle
-         }
-
-         states: State {
-             name: "back"
-             PropertyChanges { target: rotation; angle: 180 }
-             when: flipable.flipped
-         }
-
-         transitions: Transition {
-             NumberAnimation { target: rotation; property: "angle"; duration: 300 }
-         }
-     } // end flipable
-
-    } // end rectangle
-
-    // ================================================
-    // MISC FORECAST MODELS AND DELEGATES
-    // ================================================
-    ListModel { id: modelForecastDaily }
-    ListModel { id: modelForecastHourly }
-
-    ForecastDeleE6 { id: forecastDeleE6 }
-    ForecastDeleLandscape { id: forecastDeleLandscape }
-    ForecastDelePortrait { id: forecastDelePortrait }
-    HourlyDeleE6 { id: hourlyDeleE6 }
-    HourlyDeleLandscape { id: hourlyDeleLandscape }
-    HourlyDelePortrait { id: hourlyDelePortrait }
-
-    // ================================================
     // DAILY FORECAST XML MODEL
     // ================================================
     XmlListModel {
@@ -721,19 +785,19 @@ Page {
     states: [
         State {
             name: "LANDSCAPE"; when: ((screen.currentOrientation == Screen.Landscape) && (screen.height == 360))
-            PropertyChanges { target: cityView; state: "LANDSCAPE" }
+            PropertyChanges { target: cityFlick; state: "LANDSCAPE" }
             PropertyChanges { target: forecastViewDaily; state: "LANDSCAPE" }
             PropertyChanges { target: forecastViewHourly; state: "LANDSCAPE" }
         },
         State {
             name: "PORTRAIT"; when: ((screen.currentOrientation == Screen.Portrait) && (screen.height == 640))
-            PropertyChanges { target: cityView; state: "PORTRAIT" }
+            PropertyChanges { target: cityFlick; state: "PORTRAIT" }
             PropertyChanges { target: forecastViewDaily; state: "PORTRAIT" }
             PropertyChanges { target: forecastViewHourly; state: "PORTRAIT" }
         },
         State {
             name: "E6"; when: ((screen.width == 640) && (screen.height == 480))
-            PropertyChanges { target: cityView; state: "E6" }
+            PropertyChanges { target: cityFlick; state: "E6" }
             PropertyChanges { target: forecastViewDaily; state: "E6" }
             PropertyChanges { target: forecastViewHourly; state: "E6" }
         }
@@ -754,36 +818,36 @@ Page {
         // read settings from db
         // language override from default locale
         configitem = DBcore.readConfig("language")
-        if (configitem.configvalue != undefined) {
-            console.log("Loading settings")
-            Commonfx.language = configitem.configvalue
-            rootItem.selectLanguage(Commonfx.language)
-            configitem = DBcore.readConfig("units")
-            Commonfx.units = configitem.configvalue
-            configitem = DBcore.readConfig("windunits")
-            Commonfx.windunits = configitem.configvalue
-        }
-        else {
+        if (configitem.configvalue == undefined) {
             // no config, create default: english, metric, m/s
             console.log("Creating default settings")
             DBcore.createDefaultConfig()
             configitem = DBcore.readConfig("language")
-            Commonfx.language = configitem.configvalue
-            configitem = DBcore.readConfig("units")
-            Commonfx.units = configitem.configvalue
-            configitem = DBcore.readConfig("windunits")
-            Commonfx.windunits = configitem.configvalue
         }
+        console.log("Loading settings")
+        Commonfx.language = configitem.configvalue
+        rootItem.selectLanguage(Commonfx.language) // important for dynamic translation!
+        configitem = DBcore.readConfig("units")
+        Commonfx.units = configitem.configvalue
+        configitem = DBcore.readConfig("windunits")
+        Commonfx.windunits = configitem.configvalue
+        configitem = DBcore.readConfig("hourunits")
+        Commonfx.hourunits = configitem.configvalue
+
+        // set to daily or hourly view first
+        configitem = DBcore.readConfig("firstpage")
+        Commonfx.firstpage = configitem.configvalue
+        if (Commonfx.firstpage == "hourly") { flipable.flipped = true }
+        else { flipable.flipped = false }
 
         configitem = DBcore.readConfig("cityhome")
         cityHome = configitem.configvalue
         if (cityHome != undefined) { // last city recorded
             homeCity = cityHome
             cityActive = cityHome
-            // load cached data
             console.log("Loading cached city, forecast for " + cityHome)
             loadLocalDB()
-            //favoriteCity = 1 // home city is always a favorite city
+            favoriteCity = modelCity.get(0).favoritecity
 
             // load online data if more than an hour has passed since last update
             if (Commonfx.getNewUpdate(modelCity.get(0).lastupdate, timezone) == true) {
@@ -842,6 +906,7 @@ Page {
         forecastViewHourly.model = modelForecastHourly
 
         Commonfx.currentUnits = modelCity.get(0).tempunit
+        favoriteCity = modelCity.get(0).favoritecity
     }
 
     // ================================================

@@ -17,5 +17,6 @@
         <file alias="sunset">qml/WeatherMango/icons/sunset.png</file>
         <file alias="humid">qml/WeatherMango/icons/humid.png</file>
         <file alias="wind_arrow">qml/WeatherMango/icons/wind_arrow.png</file>
+        <file alias="close_stop">qml/WeatherMango/close_stop.svg</file>
     </qresource>
 </RCC>

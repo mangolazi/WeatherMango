@@ -7,11 +7,11 @@ import "fx.js" as Commonfx
 Component {
   ListItem {
       //property variant myData: model
-      height: 65
+      height: 70
 
       Text {
           id: dateTxt
-          anchors.verticalCenter: iconImage.verticalCenter
+          anchors.verticalCenter: parent.verticalCenter
           anchors.left: parent.left
           anchors.leftMargin: 5
           text: Commonfx.getForecastdayhour(model.datefrom, timezone)
@@ -23,20 +23,20 @@ Component {
       Image {
           id: iconImage
           asynchronous: true
-          height: 65
-          width: 65
+          height: 70
+          width: 70
           anchors.horizontalCenter: parent.horizontalCenter
-          anchors.horizontalCenterOffset: -20
           anchors.verticalCenter: parent.verticalCenter
           source: Commonfx.getIcon(model.icon)
           smooth: true
       }
       Text {
           id: tempTxt
-          anchors.verticalCenter: iconImage.verticalCenter
+          anchors.verticalCenter: parent.verticalCenter
           anchors.left: iconImage.right
-          anchors.leftMargin: 15
-          width: 50
+          //anchors.leftMargin: 15
+          //width: 50
+          anchors.right: windTxt.left
           verticalAlignment: Text.AlignVCenter
           horizontalAlignment: Text.AlignHCenter
           text: Commonfx.convertTemp(model.maxtemp, Commonfx.currentUnits)
@@ -47,8 +47,11 @@ Component {
       Image {
           id: windspeedImage
           asynchronous: true
-          anchors.verticalCenter: iconImage.verticalCenter
-          anchors.right: windTxt.left
+          //anchors.verticalCenter: iconImage.verticalCenter
+          //anchors.right: windTxt.left
+          //anchors.right: parent.right
+          anchors.bottom: windTxt.top
+          anchors.horizontalCenter: windTxt.horizontalCenter
           height: 30
           width: 30
           smooth: true
@@ -57,14 +60,17 @@ Component {
       }
       Text {
           id: windTxt
-          anchors.verticalCenter: iconImage.verticalCenter
+          //anchors.verticalCenter: iconImage.verticalCenter
+          anchors.top: parent.verticalCenter
+          anchors.topMargin: 5
           anchors.right: parent.right
-          anchors.rightMargin: 2
+          anchors.rightMargin: 5
           verticalAlignment: Text.AlignVCenter
-          horizontalAlignment: Text.AlignLeft
+          horizontalAlignment: Text.AlignHCenter
           text: Commonfx.convertWindspeed(model.windspeed)
           color: "lightgray"
-          font.pixelSize: 15
+          font.pixelSize: 16
+          wrapMode: Text.WordWrap
       }
 
   }

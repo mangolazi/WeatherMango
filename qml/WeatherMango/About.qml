@@ -19,7 +19,7 @@ import com.nokia.symbian 1.1
 Page {
     id: about
     tools: mainToolbar
-    property string version: "25"
+    property string version: "27"
 
     // Default toolbar
     ToolBarLayout {
@@ -78,7 +78,7 @@ Page {
         horizontalAlignment: Text.AlignLeft
         MouseArea {
             anchors.fill: parent
-            onClicked: Qt.openUrlExternally("http://openweathermap.org")
+            onClicked: Qt.openUrlExternally("http://m.openweathermap.org")
         }
     }
     Text {

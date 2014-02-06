@@ -11,7 +11,7 @@
     <message>
         <location filename="../qml/WeatherMango/About.qml" line="93"/>
         <source>AboutText</source>
-        <translation type="unfinished">WeatherMango is a simple weather app that uses OpenWeatherMap.org data. Click on a daily forecast to see the hourly forecast for that day.
+        <translation>WeatherMango is a simple weather app that uses OpenWeatherMap.org data. Click on a daily forecast to see the hourly forecast for that day.
 
 Toolbar:
 Home icon - loads data for your home city (long press to set home city to your current GPS position)
@@ -153,12 +153,12 @@ Weather icons by Andrew Zhilin 2008, originally for Other Maemo Weather, license
     <message>
         <location filename="../qml/WeatherMango/Settings.qml" line="146"/>
         <source>Wind units</source>
-        <translation>Wind units</translation>
+        <translation>Wind speed</translation>
     </message>
     <message>
         <location filename="../qml/WeatherMango/Settings.qml" line="163"/>
         <source>Select wind measurement</source>
-        <translation>Select wind measurement</translation>
+        <translation>Select wind speed units</translation>
     </message>
 </context>
 </TS>

@@ -219,6 +219,8 @@ function createDefaultConfig(configItem)
                     tx.executeSql("INSERT INTO config (configkey, configvalue) VALUES('units_name','Celsius')");
                     tx.executeSql("INSERT INTO config (configkey, configvalue) VALUES('windunits','ms')");
                     tx.executeSql("INSERT INTO config (configkey, configvalue) VALUES('windunits_name','meters per second')");
+                    tx.executeSql("INSERT INTO config (configkey, configvalue) VALUES('firstpage','daily')");
+                    tx.executeSql("INSERT INTO config (configkey, configvalue) VALUES('hourunits','am pm')");
                 }
                 )
 }

@@ -12,7 +12,7 @@ RESOURCES += \
 QML_IMPORT_PATH =
 
 symbian:TARGET.UID3 = 0xE144350F
-VERSION = 25
+VERSION = 27
 
 # Smart Installer package's UID
 # This UID is from the protected range and therefore the package will

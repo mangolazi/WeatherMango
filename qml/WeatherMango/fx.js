@@ -18,6 +18,8 @@ var language = "";
 var units = "";
 var windunits = "";
 var currentUnits = "celsius";
+var firstpage = "";
+var hourunits = ""; // "am pm" or "24"
 var settingsChanged = false;
 
 // COMMON FUNCTIONS
@@ -79,7 +81,13 @@ function getForecastdayhour(datestring, timezone) {
     //2013-12-31T03:44:37 crazyass bug on months???
     var inputdate = new Date(datestring.substring(0,4), datestring.substring(5,7) - 1, datestring.substring(8,10), datestring.substring(11,13), datestring.substring(14,16), 0, 0);
     inputdate.setHours(inputdate.getHours() + timezone);
-    var outputdate = Qt.formatDateTime(inputdate, "ddd h ap");
+    var outputdate; // = Qt.formatDateTime(inputdate, "ddd h ap");
+    if (hourunits == "24") {
+        outputdate = Qt.formatDateTime(inputdate, "ddd hh:mm");
+    }
+    else {
+        outputdate = Qt.formatDateTime(inputdate, "ddd h ap");
+    }
     return outputdate;
 }
 
@@ -88,7 +96,13 @@ function getForecasthour(datestring, timezone) {
     //2013-12-31T03:44:37 crazyass bug on months???
     var inputdate = new Date(datestring.substring(0,4), datestring.substring(5,7) - 1, datestring.substring(8,10), datestring.substring(11,13), datestring.substring(14,16), 0, 0);
     inputdate.setHours(inputdate.getHours() + timezone);
-    var outputdate = Qt.formatDateTime(inputdate, "h:mm ap");
+    var outputdate;
+    if (hourunits == "24") {
+        outputdate = Qt.formatDateTime(inputdate, "hh:mm");
+    }
+    else {
+        outputdate = Qt.formatDateTime(inputdate, "h:mm ap");
+    }
     return outputdate;
 }
 
@@ -183,7 +197,7 @@ function convertWindspeed(windspeed) {
 function getNewUpdate(datestring, timezone) {
     // load online data if more than an hour has passed since last update
     var lastupdate = new Date(datestring.substring(0,4), datestring.substring(5,7) - 1, datestring.substring(8,10), datestring.substring(11,13), datestring.substring(14,16), 0, 0);
-    lastupdate.setHours(lastupdate.getHours() + (timezone + 1));
+    lastupdate.setHours(lastupdate.getHours() + (timezone + 1.5));
     var currentdate = new Date();
     if (currentdate > lastupdate) {
         return true;

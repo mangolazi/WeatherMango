@@ -15,6 +15,8 @@ Page {
     property string p_units : "" // temperature units
     property string p_windunits_name : "" // wind units
     property string p_windunits : "" // wind units
+    property string p_firstpage : "" // daily or hourly view as first page
+    property string p_hourunits : "" // am/pm or 24 hour time
 
 
     // DEFAULT TOOLBAR
@@ -32,12 +34,27 @@ Page {
                 pageStack.pop()
             }
         }
+        ToolButton {
+            id: toolbarbtnAbout
+            flat: false
+            text: "About"
+            onClicked: {
+                pageStack.push(Qt.resolvedUrl("About.qml"))
+            }
+        }
     }
 
     // ================================================
     // language row - english, chinese, russian
     // for xml data only, not interface
     // ================================================
+    Flickable {
+         width: parent.width
+         height: parent.height
+         contentWidth: parent.width
+         contentHeight: languageRow.height + unitsRow.height + windunitsRow.height + firstpageRow.height + hourunitsRow.height + hourunitsRow.height
+
+
     Row {
         id: languageRow
         anchors.top: parent.top
@@ -94,7 +111,6 @@ Page {
         }
 
     } // end language row
-
 
     // units row - metric, imperial, us
     Row {
@@ -169,7 +185,6 @@ Page {
             width: parent.width / 2
             onClicked: windunitsDialog.open()
 
-
             SelectionDialog {
                 id: windunitsDialog
                 titleText: qsTr("Select wind measurement") + rootItem.emptyString
@@ -194,10 +209,105 @@ Page {
                 }
             }
         }
-
-
     } // end windspeed units row
 
+    // hour units row
+    Row {
+        id: hourunitsRow
+        anchors.top: firstpageRow.bottom
+        anchors.topMargin: 20
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        Text {
+            text: qsTr("Hour units") + rootItem.emptyString
+            width: parent.width / 2
+            anchors.verticalCenter: hourunitsList.verticalCenter
+            horizontalAlignment: Text.AlignLeft
+            color: "white"
+            font.pixelSize: platformStyle.fontSizeLarge
+            font.bold: true
+            wrapMode: Text.Wrap
+        }
+
+        // Category chooser
+        SelectionListItem {
+            id: hourunitsList
+            width: parent.width / 2
+            onClicked: hourunitsDialog.open()
+
+            SelectionDialog {
+                id: hourunitsDialog
+                titleText: qsTr("Hour units") + rootItem.emptyString
+                selectedIndex: -1
+                model: ListModel {
+                    ListElement { name: "am pm"; hourunits: "am pm" }
+                    ListElement { name: "24"; hourunits: "24" }
+                    }
+                delegate: Component {
+                    MenuItem {
+                        text: name
+                        onClicked: {
+                            hourunitsList.title = model.name
+                            p_hourunits = model.hourunits
+                            selectedIndex = index
+                            root.accept()
+                        }
+                    }
+                }
+            }
+        }
+    } // end firstpage row
+
+    // firstpage row
+    Row {
+        id: firstpageRow
+        anchors.top: windunitsRow.bottom
+        anchors.topMargin: 20
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        Text {
+            text: qsTr("First page") + rootItem.emptyString
+            width: parent.width / 2
+            anchors.verticalCenter: firstpageList.verticalCenter
+            horizontalAlignment: Text.AlignLeft
+            color: "white"
+            font.pixelSize: platformStyle.fontSizeLarge
+            font.bold: true
+            wrapMode: Text.Wrap
+        }
+
+        // Category chooser
+        SelectionListItem {
+            id: firstpageList
+            width: parent.width / 2
+            onClicked: firstpageDialog.open()
+
+            SelectionDialog {
+                id: firstpageDialog
+                titleText: qsTr("Forecast to view on loading") + rootItem.emptyString
+                selectedIndex: -1
+                model: ListModel {
+                    ListElement { name: "daily"; firstpage: "daily" }
+                    ListElement { name: "hourly"; firstpage: "hourly" }
+                    }
+                delegate: Component {
+                    MenuItem {
+                        text: name
+                        onClicked: {
+                            firstpageList.title = model.name
+                            p_firstpage = model.firstpage
+                            selectedIndex = index
+                            root.accept()
+                        }
+                    }
+                }
+            }
+        }
+    } // end firstpage row
+
+    } // end flickable
 
     // load current settings
     onStatusChanged: {
@@ -220,6 +330,14 @@ Page {
             windunitsList.title = p_windunits_name
             configitem = DBcore.readConfig("windunits")
             p_windunits = configitem.configvalue
+
+            configitem = DBcore.readConfig("firstpage")
+            p_firstpage = configitem.configvalue
+            firstpageList.title = p_firstpage
+
+            configitem = DBcore.readConfig("hourunits")
+            p_hourunits = configitem.configvalue
+            hourunitsList.title = p_hourunits
 
             console.log("LOAD DB " + p_lang + " " + p_units + " " + p_windunits)
             console.log("LOAD DB " + p_lang_name + " " + p_units_name + " " + p_windunits_name)
@@ -261,14 +379,25 @@ Page {
         DBcore.deleteConfig(configitem.configkey)
         DBcore.createConfig(configitem);
 
+        configitem.configkey = "firstpage"
+        configitem.configvalue = p_firstpage
+        DBcore.deleteConfig(configitem.configkey)
+        DBcore.createConfig(configitem);
+
+        configitem.configkey = "hourunits"
+        configitem.configvalue = p_hourunits
+        DBcore.deleteConfig(configitem.configkey)
+        DBcore.createConfig(configitem);
+
         CommonFx.language = p_lang
         CommonFx.units = p_units
         CommonFx.windunits = p_windunits
+        CommonFx.hourunits = p_hourunits
 
         rootItem.selectLanguage(p_lang);
 
         console.log("SAVE DB " + p_lang + " " + p_units + " " + p_windunits)
-        console.log("SAVE DB " + p_lang_name + " " + p_units_name + " " + p_windunits_name)
+        console.log("SAVE DB " + p_lang_name + " " + p_units_name + " " + p_windunits_name + " " + p_firstpage + p_hourunits)
     }
 
 }// end page
